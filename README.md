@@ -1,10 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Vani AI | Text to Speech – English & Hindi (Fully Functional)</title>
-    <!-- Tailwind + Font Awesome -->
+    <title>Vani AI | Text to Speech with MP3 Export – English & Hindi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -34,6 +33,13 @@
         .btn-outline:hover {
             background: rgba(255,255,255,0.15);
         }
+        .btn-download {
+            background: linear-gradient(105deg, #10b981, #059669);
+        }
+        .btn-download:hover {
+            background: linear-gradient(105deg, #34d399, #10b981);
+            transform: translateY(-2px);
+        }
         select, textarea {
             background: rgba(0,0,0,0.3);
             border: 1px solid #334155;
@@ -60,15 +66,15 @@
             border-radius: 50%;
             cursor: pointer;
         }
-        .status-badge {
-            transition: all 0.2s;
-        }
         @keyframes pulse {
             0%,100% { opacity: 1; }
             50% { opacity: 0.6; }
         }
         .speaking-active {
             animation: pulse 1s infinite;
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
         }
     </style>
 </head>
@@ -78,12 +84,12 @@
         <div class="text-center mb-8">
             <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 border border-white/20 mb-3">
                 <i class="fas fa-microphone-alt text-blue-400"></i>
-                <span class="text-xs font-mono tracking-wider text-blue-200">WEB SPEECH API · MULTILINGUAL</span>
+                <span class="text-xs font-mono tracking-wider text-blue-200">LIVE SPEECH · MP3 EXPORT</span>
             </div>
             <h1 class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-300 via-indigo-300 to-purple-300 bg-clip-text text-transparent">
                 Vani <span class="text-white">AI</span>
             </h1>
-            <p class="text-gray-300 mt-2">English · हिन्दी · Adjustable Voice & Speed</p>
+            <p class="text-gray-300 mt-2">English · हिन्दी · Speak & Download High-Quality MP3</p>
         </div>
 
         <div class="glass-card p-6 md:p-8">
@@ -99,12 +105,12 @@
                         <option value="en-GB">🇬🇧 English (UK)</option>
                     </select>
                     <p id="hindiWarning" class="text-xs text-amber-400 mt-1 hidden">
-                        ⚠️ Hindi voice may not be available. System will use default (still works for Hindi text).
+                        ⚠️ Hindi live voice may not be available. Download works perfectly.
                     </p>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold mb-2 flex items-center gap-2">
-                        <i class="fas fa-user-astronaut text-green-400"></i> Voice
+                        <i class="fas fa-user-astronaut text-green-400"></i> Live Voice
                     </label>
                     <select id="voiceSelect" class="w-full p-2.5">
                         <option value="">🤖 Auto (Best match)</option>
@@ -127,7 +133,7 @@
                 </div>
             </div>
 
-            <!-- Rate & Pitch Controls -->
+            <!-- Rate & Pitch Controls (live speech only) -->
             <div class="grid md:grid-cols-2 gap-6 mb-8">
                 <div>
                     <label class="block text-sm font-semibold mb-2">🔊 Speed (Rate)</label>
@@ -163,6 +169,20 @@
                 <button id="stopBtn" class="btn-outline px-5 py-2.5 rounded-full flex items-center gap-2">
                     <i class="fas fa-stop"></i> Stop
                 </button>
+                <button id="downloadBtn" class="btn-download px-5 py-2.5 rounded-full font-semibold flex items-center gap-2 shadow-lg">
+                    <i class="fas fa-download"></i> Download MP3
+                </button>
+            </div>
+
+            <!-- Download Progress -->
+            <div id="downloadProgress" class="hidden mb-4">
+                <div class="flex justify-between text-xs mb-1">
+                    <span>Generating MP3...</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="w-full bg-slate-700 rounded-full h-1.5">
+                    <div id="progressBar" class="bg-green-500 h-1.5 rounded-full progress-bar" style="width:0%"></div>
+                </div>
             </div>
 
             <!-- Status Panel -->
@@ -172,286 +192,233 @@
                     <span>Ready</span>
                 </div>
                 <div class="text-xs text-gray-400 flex gap-3">
-                    <span><i class="fas fa-check-circle text-green-500"></i> Works offline</span>
-                    <span><i class="fas fa-globe"></i> Hindi & English</span>
+                    <span><i class="fas fa-check-circle text-green-500"></i> Live speech</span>
+                    <span><i class="fas fa-cloud-download-alt"></i> MP3 export</span>
                 </div>
             </div>
         </div>
 
         <footer class="text-center text-gray-500 text-xs mt-6">
-            <p>💡 Tip: If you don't hear Hindi voices, the system will still read Hindi text using a default voice. For best Hindi experience, use Chrome/Edge on Windows/Mac with Hindi TTS installed.</p>
+            <p>💡 <strong>Download MP3:</strong> Uses StreamElements TTS – high quality, supports English & Hindi. Long text split automatically.</p>
+            <p>🎙️ <strong>Live speech:</strong> Uses browser's built-in voices. Adjust speed & pitch.</p>
+            <p class="mt-1">🔊 If download fails, check your internet connection or try again later.</p>
         </footer>
     </div>
 
     <script>
-        // DOM Elements
-        const languageSelect = document.getElementById('languageSelect');
-        const voiceSelect = document.getElementById('voiceSelect');
-        const textInput = document.getElementById('textInput');
-        const rateSlider = document.getElementById('rateSlider');
-        const pitchSlider = document.getElementById('pitchSlider');
-        const rateValue = document.getElementById('rateValue');
-        const pitchValue = document.getElementById('pitchValue');
-        const speakBtn = document.getElementById('speakBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const resumeBtn = document.getElementById('resumeBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const charCount = document.getElementById('charCount');
-        const statusSpan = document.getElementById('status');
-        const hindiWarning = document.getElementById('hindiWarning');
-        const refreshVoicesBtn = document.getElementById('refreshVoicesBtn');
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // ==================== DOM Elements ====================
+            const languageSelect = document.getElementById('languageSelect');
+            const voiceSelect = document.getElementById('voiceSelect');
+            const textInput = document.getElementById('textInput');
+            const rateSlider = document.getElementById('rateSlider');
+            const pitchSlider = document.getElementById('pitchSlider');
+            const rateValue = document.getElementById('rateValue');
+            const pitchValue = document.getElementById('pitchValue');
+            const speakBtn = document.getElementById('speakBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const resumeBtn = document.getElementById('resumeBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const charCount = document.getElementById('charCount');
+            const statusSpan = document.getElementById('status');
+            const hindiWarning = document.getElementById('hindiWarning');
+            const refreshVoicesBtn = document.getElementById('refreshVoicesBtn');
+            const downloadProgressDiv = document.getElementById('downloadProgress');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
 
-        // Global variables
-        let voices = [];
-        let currentUtterance = null;
-        let isPaused = false;
-
-        // Update character count
-        function updateCharCount() {
-            const len = textInput.value.length;
-            charCount.textContent = `${len} characters`;
-        }
-        textInput.addEventListener('input', updateCharCount);
-        updateCharCount();
-
-        // Clear text
-        clearBtn.addEventListener('click', () => {
-            textInput.value = '';
-            updateCharCount();
-            stopSpeech();
-            setStatus('Text cleared', 'info');
-        });
-
-        // Helper to set status with icon
-        function setStatus(message, type = 'info') {
-            let icon = '';
-            switch(type) {
-                case 'speaking': icon = '<i class="fas fa-volume-up text-green-400 animate-pulse"></i>'; break;
-                case 'error': icon = '<i class="fas fa-exclamation-triangle text-red-400"></i>'; break;
-                case 'success': icon = '<i class="fas fa-check-circle text-green-400"></i>'; break;
-                default: icon = '<i class="fas fa-circle-info text-blue-300"></i>';
-            }
-            statusSpan.innerHTML = `${icon} <span>${message}</span>`;
-        }
-
-        // Load voices and populate dropdown
-        function loadVoices() {
-            voices = window.speechSynthesis.getVoices();
-            if (voices.length === 0) {
-                // Voices not loaded yet, try again in a bit
-                setTimeout(loadVoices, 200);
-                return;
-            }
-            populateVoiceDropdown();
-            checkHindiVoiceAvailability();
-        }
-
-        function populateVoiceDropdown() {
-            const selectedLang = languageSelect.value;
-            const filtered = voices.filter(v => v.lang.startsWith(selectedLang));
-            voiceSelect.innerHTML = '<option value="">🤖 Auto (Best match)</option>';
-            if (filtered.length === 0) {
-                // Show all voices but mark them
-                voices.forEach(voice => {
-                    const option = document.createElement('option');
-                    option.value = voice.name;
-                    option.textContent = `${voice.name} (${voice.lang})`;
-                    voiceSelect.appendChild(option);
-                });
-            } else {
-                filtered.forEach(voice => {
-                    const option = document.createElement('option');
-                    option.value = voice.name;
-                    option.textContent = `${voice.name} (${voice.lang})`;
-                    voiceSelect.appendChild(option);
-                });
-            }
-        }
-
-        function checkHindiVoiceAvailability() {
-            const hasHindi = voices.some(v => v.lang.startsWith('hi-IN'));
-            if (!hasHindi) {
-                hindiWarning.classList.remove('hidden');
-            } else {
-                hindiWarning.classList.add('hidden');
-            }
-        }
-
-        // Refresh voices manually
-        function refreshVoices() {
-            window.speechSynthesis.cancel(); // cancel any ongoing
-            // Force voice list reload
-            window.speechSynthesis.getVoices(); // sometimes forces refresh
-            setTimeout(() => {
-                loadVoices();
-                setStatus('Voices refreshed', 'success');
-            }, 100);
-        }
-
-        // Get selected voice object
-        function getSelectedVoice() {
-            const selectedName = voiceSelect.value;
-            if (!selectedName) return null;
-            return voices.find(v => v.name === selectedName) || null;
-        }
-
-        // Core speech function
-        function speak() {
-            const text = textInput.value.trim();
-            if (text === "") {
-                setStatus("Please enter some text", "error");
-                return;
-            }
-
-            // Cancel any ongoing speech to avoid queue conflicts
-            if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
-                window.speechSynthesis.cancel();
-                if (currentUtterance) {
-                    currentUtterance = null;
+            // ==================== Helper Functions ====================
+            function setStatus(message, type = 'info') {
+                let icon = '';
+                switch(type) {
+                    case 'speaking': icon = '<i class="fas fa-volume-up text-green-400 animate-pulse"></i>'; break;
+                    case 'error': icon = '<i class="fas fa-exclamation-triangle text-red-400"></i>'; break;
+                    case 'success': icon = '<i class="fas fa-check-circle text-green-400"></i>'; break;
+                    default: icon = '<i class="fas fa-circle-info text-blue-300"></i>';
                 }
-                // small delay to allow cancel to complete
-                setTimeout(() => performSpeak(text), 50);
-            } else {
-                performSpeak(text);
-            }
-        }
-
-        function performSpeak(text) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            // Set language
-            utterance.lang = languageSelect.value;
-            // Set rate & pitch
-            utterance.rate = parseFloat(rateSlider.value);
-            utterance.pitch = parseFloat(pitchSlider.value);
-
-            // Set voice if manually selected
-            const selectedVoice = getSelectedVoice();
-            if (selectedVoice) {
-                utterance.voice = selectedVoice;
-            } else {
-                // Auto: try to find a voice that matches the language
-                const autoVoice = voices.find(v => v.lang.startsWith(utterance.lang));
-                if (autoVoice) utterance.voice = autoVoice;
+                statusSpan.innerHTML = `${icon} <span>${message}</span>`;
             }
 
-            // Event handlers
-            utterance.onstart = () => {
-                isPaused = false;
-                setStatus("Speaking...", "speaking");
-                speakBtn.classList.add('speaking-active');
-            };
-            utterance.onend = () => {
-                isPaused = false;
-                setStatus("Finished", "success");
-                speakBtn.classList.remove('speaking-active');
-                currentUtterance = null;
-            };
-            utterance.onerror = (event) => {
-                console.error('Speech error:', event);
-                let errorMsg = "Error occurred";
-                if (event.error === 'not-allowed') errorMsg = "Speech not allowed. Please check permissions.";
-                else if (event.error === 'language-unavailable') errorMsg = "Language not supported on this device.";
-                else errorMsg = `Error: ${event.error}`;
-                setStatus(errorMsg, "error");
-                speakBtn.classList.remove('speaking-active');
-                currentUtterance = null;
-            };
-            utterance.onpause = () => {
-                isPaused = true;
-                setStatus("Paused", "info");
-            };
-            utterance.onresume = () => {
-                isPaused = false;
-                setStatus("Speaking...", "speaking");
-            };
-
-            currentUtterance = utterance;
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function pauseSpeech() {
-            if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-                window.speechSynthesis.pause();
-                setStatus("Paused", "info");
-            } else if (!window.speechSynthesis.speaking) {
-                setStatus("No speech to pause", "error");
-            } else if (window.speechSynthesis.paused) {
-                setStatus("Already paused", "info");
+            function updateCharCount() {
+                const len = textInput.value.length;
+                charCount.textContent = `${len} characters`;
             }
-        }
-
-        function resumeSpeech() {
-            if (window.speechSynthesis.paused) {
-                window.speechSynthesis.resume();
-                setStatus("Resumed", "speaking");
-            } else if (window.speechSynthesis.speaking) {
-                setStatus("Already speaking", "info");
-            } else {
-                // If nothing is playing, start new speech
-                speak();
-            }
-        }
-
-        function stopSpeech() {
-            if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
-                window.speechSynthesis.cancel();
-                setStatus("Stopped", "info");
-                speakBtn.classList.remove('speaking-active');
-                if (currentUtterance) {
-                    currentUtterance = null;
-                }
-            } else {
-                setStatus("No speech to stop", "info");
-            }
-        }
-
-        // Slider display updates
-        rateSlider.addEventListener('input', () => {
-            rateValue.textContent = rateSlider.value;
-        });
-        pitchSlider.addEventListener('input', () => {
-            pitchValue.textContent = pitchSlider.value;
-        });
-
-        // Language change updates voice dropdown
-        languageSelect.addEventListener('change', () => {
-            populateVoiceDropdown();
-            checkHindiVoiceAvailability();
-            // Optionally stop any current speech when language changes
-            stopSpeech();
-            setStatus("Language changed", "info");
-        });
-
-        // Button events
-        speakBtn.addEventListener('click', speak);
-        pauseBtn.addEventListener('click', pauseSpeech);
-        resumeBtn.addEventListener('click', resumeSpeech);
-        stopBtn.addEventListener('click', stopSpeech);
-        refreshVoicesBtn.addEventListener('click', refreshVoices);
-
-        // Load voices when page loads
-        if (window.speechSynthesis.onvoiceschanged !== undefined) {
-            window.speechSynthesis.onvoiceschanged = () => {
-                loadVoices();
-            };
-        }
-        loadVoices(); // initial call
-
-        // Fallback: if voices not loaded after 1 sec, retry
-        setTimeout(() => {
-            if (voices.length === 0) loadVoices();
-        }, 1000);
-
-        // Set initial slider values
-        rateValue.textContent = rateSlider.value;
-        pitchValue.textContent = pitchSlider.value;
-
-        // Add a demo text if empty
-        if (textInput.value === "") {
-            textInput.value = "Namaste! Welcome to Vani AI. आप हिंदी में भी टाइप कर सकते हैं और मैं स्पष्ट आवाज़ में पढ़ूंगा।";
+            textInput.addEventListener('input', updateCharCount);
             updateCharCount();
-        }
-    </script>
-</body>
-</html>
+            clearBtn.addEventListener('click', () => {
+                textInput.value = '';
+                updateCharCount();
+                stopSpeech();
+                setStatus('Text cleared', 'info');
+            });
+
+            // ==================== LIVE SPEECH (Web Speech API) ====================
+            let voices = [];
+            let currentUtterance = null;
+
+            // Check if speech synthesis is supported
+            if (!window.speechSynthesis) {
+                setStatus('Your browser does not support speech synthesis.', 'error');
+                speakBtn.disabled = true;
+                pauseBtn.disabled = true;
+                resumeBtn.disabled = true;
+                stopBtn.disabled = true;
+            }
+
+            function loadVoices() {
+                voices = window.speechSynthesis.getVoices();
+                if (voices.length === 0) {
+                    setTimeout(loadVoices, 200);
+                    return;
+                }
+                populateVoiceDropdown();
+                checkHindiVoiceAvailability();
+            }
+
+            function populateVoiceDropdown() {
+                const selectedLang = languageSelect.value;
+                const filtered = voices.filter(v => v.lang.startsWith(selectedLang));
+                voiceSelect.innerHTML = '<option value="">🤖 Auto (Best match)</option>';
+                if (filtered.length === 0) {
+                    voices.forEach(voice => {
+                        const option = document.createElement('option');
+                        option.value = voice.name;
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        voiceSelect.appendChild(option);
+                    });
+                } else {
+                    filtered.forEach(voice => {
+                        const option = document.createElement('option');
+                        option.value = voice.name;
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        voiceSelect.appendChild(option);
+                    });
+                }
+            }
+
+            function checkHindiVoiceAvailability() {
+                const hasHindi = voices.some(v => v.lang.startsWith('hi-IN'));
+                if (!hasHindi) {
+                    hindiWarning.classList.remove('hidden');
+                } else {
+                    hindiWarning.classList.add('hidden');
+                }
+            }
+
+            function refreshVoices() {
+                if (window.speechSynthesis) {
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.getVoices(); // trigger reload
+                    setTimeout(() => {
+                        loadVoices();
+                        setStatus('Voices refreshed', 'success');
+                    }, 200);
+                }
+            }
+
+            function getSelectedVoice() {
+                const selectedName = voiceSelect.value;
+                if (!selectedName) return null;
+                return voices.find(v => v.name === selectedName) || null;
+            }
+
+            function speak() {
+                const text = textInput.value.trim();
+                if (text === "") {
+                    setStatus("Please enter some text", "error");
+                    return;
+                }
+                if (!window.speechSynthesis) {
+                    setStatus("Speech synthesis not supported", "error");
+                    return;
+                }
+                // Cancel any ongoing speech
+                if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+                    window.speechSynthesis.cancel();
+                    setTimeout(() => performSpeak(text), 100);
+                } else {
+                    performSpeak(text);
+                }
+            }
+
+            function performSpeak(text) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = languageSelect.value;
+                utterance.rate = parseFloat(rateSlider.value);
+                utterance.pitch = parseFloat(pitchSlider.value);
+                const selectedVoice = getSelectedVoice();
+                if (selectedVoice) utterance.voice = selectedVoice;
+                else {
+                    const autoVoice = voices.find(v => v.lang.startsWith(utterance.lang));
+                    if (autoVoice) utterance.voice = autoVoice;
+                }
+                utterance.onstart = () => {
+                    setStatus("Speaking...", "speaking");
+                    speakBtn.classList.add('speaking-active');
+                };
+                utterance.onend = () => {
+                    setStatus("Finished", "success");
+                    speakBtn.classList.remove('speaking-active');
+                    currentUtterance = null;
+                };
+                utterance.onerror = (event) => {
+                    setStatus(`Error: ${event.error}`, "error");
+                    speakBtn.classList.remove('speaking-active');
+                    currentUtterance = null;
+                };
+                utterance.onpause = () => {
+                    setStatus("Paused", "info");
+                };
+                utterance.onresume = () => {
+                    setStatus("Speaking...", "speaking");
+                };
+                currentUtterance = utterance;
+                window.speechSynthesis.speak(utterance);
+            }
+
+            function pauseSpeech() {
+                if (window.speechSynthesis && window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+                    window.speechSynthesis.pause();
+                    setStatus("Paused", "info");
+                } else if (!window.speechSynthesis || !window.speechSynthesis.speaking) {
+                    setStatus("No speech to pause", "error");
+                }
+            }
+
+            function resumeSpeech() {
+                if (window.speechSynthesis && window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                    setStatus("Resumed", "speaking");
+                } else if (window.speechSynthesis && window.speechSynthesis.speaking) {
+                    setStatus("Already speaking", "info");
+                } else {
+                    speak();
+                }
+            }
+
+            function stopSpeech() {
+                if (window.speechSynthesis && (window.speechSynthesis.speaking || window.speechSynthesis.pending)) {
+                    window.speechSynthesis.cancel();
+                    setStatus("Stopped", "info");
+                    speakBtn.classList.remove('speaking-active');
+                    currentUtterance = null;
+                } else {
+                    setStatus("No speech to stop", "info");
+                }
+            }
+
+            rateSlider.addEventListener('input', () => rateValue.textContent = rateSlider.value);
+            pitchSlider.addEventListener('input', () => pitchValue.textContent = pitchSlider.value);
+            languageSelect.addEventListener('change', () => {
+                populateVoiceDropdown();
+                checkHindiVoiceAvailability();
+                stopSpeech();
+                setStatus("Language changed", "info");
+            });
+            speakBtn.addEventListener('click', speak);
+            pauseBtn.addEventListener('click', pauseSpeech);
+            resumeBtn.addEventListener('click', resumeSpeech);
+            stopBtn.addEventListener('click'
