@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Vani AI | Text to Speech тАУ English & Hindi (Fully Functional)</title>
+    <title>Vani AI | Text to Speech – English & Hindi (Fully Functional)</title>
     <!-- Tailwind + Font Awesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -78,12 +78,12 @@
         <div class="text-center mb-8">
             <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 border border-white/20 mb-3">
                 <i class="fas fa-microphone-alt text-blue-400"></i>
-                <span class="text-xs font-mono tracking-wider text-blue-200">WEB SPEECH API ┬╖ MULTILINGUAL</span>
+                <span class="text-xs font-mono tracking-wider text-blue-200">WEB SPEECH API · MULTILINGUAL</span>
             </div>
             <h1 class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-300 via-indigo-300 to-purple-300 bg-clip-text text-transparent">
                 Vani <span class="text-white">AI</span>
             </h1>
-            <p class="text-gray-300 mt-2">English ┬╖ рд╣рд┐рдиреНрджреА ┬╖ Adjustable Voice & Speed</p>
+            <p class="text-gray-300 mt-2">English · हिन्दी · Adjustable Voice & Speed</p>
         </div>
 
         <div class="glass-card p-6 md:p-8">
@@ -94,12 +94,12 @@
                         <i class="fas fa-language text-indigo-400"></i> Language
                     </label>
                     <select id="languageSelect" class="w-full p-2.5">
-                        <option value="en-US">ЁЯЗ║ЁЯЗ╕ English (US)</option>
-                        <option value="hi-IN">ЁЯЗоЁЯЗ│ рд╣рд┐рдиреНрджреА (Hindi)</option>
-                        <option value="en-GB">ЁЯЗмЁЯЗз English (UK)</option>
+                        <option value="en-US">🇺🇸 English (US)</option>
+                        <option value="hi-IN">🇮🇳 हिन्दी (Hindi)</option>
+                        <option value="en-GB">🇬🇧 English (UK)</option>
                     </select>
                     <p id="hindiWarning" class="text-xs text-amber-400 mt-1 hidden">
-                        тЪая╕П Hindi voice may not be available. System will use default (still works for Hindi text).
+                        ⚠️ Hindi voice may not be available. System will use default (still works for Hindi text).
                     </p>
                 </div>
                 <div>
@@ -107,7 +107,7 @@
                         <i class="fas fa-user-astronaut text-green-400"></i> Voice
                     </label>
                     <select id="voiceSelect" class="w-full p-2.5">
-                        <option value="">ЁЯдЦ Auto (Best match)</option>
+                        <option value="">🤖 Auto (Best match)</option>
                     </select>
                     <button id="refreshVoicesBtn" class="text-xs text-blue-300 mt-1 flex items-center gap-1 hover:text-blue-200">
                         <i class="fas fa-sync-alt"></i> Refresh voices
@@ -120,7 +120,7 @@
                 <label class="block text-sm font-semibold mb-2 flex items-center gap-2">
                     <i class="fas fa-edit text-cyan-400"></i> Enter text
                 </label>
-                <textarea id="textInput" rows="5" class="w-full p-3 text-gray-200 placeholder-gray-500 rounded-xl" placeholder="Type in English or Hindi...&#10;Example: рдирдорд╕реНрддреЗ, рдореИрдВ рд╣рд┐рдВрджреА рдореЗрдВ рдмреЛрд▓ рд╕рдХрддрд╛ рд╣реВрдБред"></textarea>
+                <textarea id="textInput" rows="5" class="w-full p-3 text-gray-200 placeholder-gray-500 rounded-xl" placeholder="Type in English or Hindi...&#10;Example: नमस्ते, मैं हिंदी में बोल सकता हूँ।"></textarea>
                 <div class="flex justify-between mt-2 text-xs text-gray-400">
                     <span id="charCount">0 characters</span>
                     <button id="clearBtn" class="hover:text-white"><i class="fas fa-eraser"></i> Clear</button>
@@ -130,20 +130,20 @@
             <!-- Rate & Pitch Controls -->
             <div class="grid md:grid-cols-2 gap-6 mb-8">
                 <div>
-                    <label class="block text-sm font-semibold mb-2">ЁЯФК Speed (Rate)</label>
+                    <label class="block text-sm font-semibold mb-2">🔊 Speed (Rate)</label>
                     <div class="flex items-center gap-3">
-                        <span class="text-xs">ЁЯРв</span>
+                        <span class="text-xs">🐢</span>
                         <input type="range" id="rateSlider" min="0.5" max="2" step="0.05" value="1" class="range-slider flex-1">
-                        <span class="text-xs">ЁЯРЗ</span>
+                        <span class="text-xs">🐇</span>
                     </div>
                     <div class="text-center text-sm mt-1"><span id="rateValue">1.0</span>x</div>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold mb-2">ЁЯО╡ Pitch</label>
+                    <label class="block text-sm font-semibold mb-2">🎵 Pitch</label>
                     <div class="flex items-center gap-3">
-                        <span class="text-xs">ЁЯФ╗</span>
+                        <span class="text-xs">🔻</span>
                         <input type="range" id="pitchSlider" min="0.5" max="2" step="0.05" value="1" class="range-slider flex-1">
-                        <span class="text-xs">ЁЯФ║</span>
+                        <span class="text-xs">🔺</span>
                     </div>
                     <div class="text-center text-sm mt-1"><span id="pitchValue">1.0</span></div>
                 </div>
@@ -179,7 +179,7 @@
         </div>
 
         <footer class="text-center text-gray-500 text-xs mt-6">
-            <p>ЁЯТб Tip: If you don't hear Hindi voices, the system will still read Hindi text using a default voice. For best Hindi experience, use Chrome/Edge on Windows/Mac with Hindi TTS installed.</p>
+            <p>💡 Tip: If you don't hear Hindi voices, the system will still read Hindi text using a default voice. For best Hindi experience, use Chrome/Edge on Windows/Mac with Hindi TTS installed.</p>
         </footer>
     </div>
 
@@ -250,7 +250,7 @@
         function populateVoiceDropdown() {
             const selectedLang = languageSelect.value;
             const filtered = voices.filter(v => v.lang.startsWith(selectedLang));
-            voiceSelect.innerHTML = '<option value="">ЁЯдЦ Auto (Best match)</option>';
+            voiceSelect.innerHTML = '<option value="">🤖 Auto (Best match)</option>';
             if (filtered.length === 0) {
                 // Show all voices but mark them
                 voices.forEach(voice => {
@@ -449,7 +449,7 @@
 
         // Add a demo text if empty
         if (textInput.value === "") {
-            textInput.value = "Namaste! Welcome to Vani AI. рдЖрдк рд╣рд┐рдВрджреА рдореЗрдВ рднреА рдЯрд╛рдЗрдк рдХрд░ рд╕рдХрддреЗ рд╣реИрдВ рдФрд░ рдореИрдВ рд╕реНрдкрд╖реНрдЯ рдЖрд╡рд╛рдЬрд╝ рдореЗрдВ рдкрдврд╝реВрдВрдЧрд╛ред";
+            textInput.value = "Namaste! Welcome to Vani AI. आप हिंदी में भी टाइप कर सकते हैं और मैं स्पष्ट आवाज़ में पढ़ूंगा।";
             updateCharCount();
         }
     </script>
